@@ -1,0 +1,84 @@
+{
+    "expectedArtifacts": [
+        {
+            "defaultArtifact": {
+                "customKind": true,
+                "id": "03c798f7-f469-4f70-aab1-683e69325e0c"
+            },
+            "displayName": "jusong-deployment-yml",
+            "id": "79a37e41-5918-43f5-a4de-18dbf7d2ecf3",
+            "matchArtifact": {
+                "artifactAccount": "jusong-solo-microservice",
+                "id": "26f800f8-7a48-4040-b642-6d446a3bd4fb",
+                "name": "manifests/deploy-microservice.yml",
+                "type": "github/file"
+            },
+            "useDefaultArtifact": false,
+            "usePriorArtifact": false
+        },
+        {
+            "defaultArtifact": {
+                "customKind": true,
+                "id": "14665d52-ed06-4831-8d47-2b59c4efe531"
+            },
+            "displayName": "jusong-docker-img",
+            "id": "3cc3a22c-05a4-4e40-bee7-179f9bf8d0c6",
+            "matchArtifact": {
+                "artifactAccount": "docker-registry",
+                "id": "d565ce20-80e2-45c3-a83b-ff08dbc832e1",
+                "name": "633102329196.dkr.ecr.us-east-2.amazonaws.com/jusong-solo-microservice",
+                "type": "docker/image"
+            },
+            "useDefaultArtifact": false,
+            "usePriorArtifact": false
+        }
+    ],
+    "keepWaitingPipelines": false,
+    "lastModifiedBy": "jusongchen",
+    "limitConcurrent": true,
+    "spelEvaluator": "v4",
+    "stages": [
+        {
+            "account": "eks-prod",
+            "cloudProvider": "kubernetes",
+            "manifestArtifactAccount": "jusong-solo-microservice",
+            "manifestArtifactId": "79a37e41-5918-43f5-a4de-18dbf7d2ecf3",
+            "moniker": {
+                "app": "jusong-solo-microservice"
+            },
+            "name": "Deploy (Manifest)",
+            "refId": "1",
+            "requiredArtifactIds": [
+                "3cc3a22c-05a4-4e40-bee7-179f9bf8d0c6"
+            ],
+            "requiredArtifacts": [],
+            "requisiteStageRefIds": [],
+            "skipExpressionEvaluation": false,
+            "source": "artifact",
+            "trafficManagement": {
+                "enabled": false,
+                "options": {
+                    "enableTraffic": false,
+                    "services": []
+                }
+            },
+            "type": "deployManifest"
+        }
+    ],
+    "triggers": [
+        {
+            "application": "jusong-solo-microservice",
+            "enabled": true,
+            "expectedArtifactIds": [
+                "79a37e41-5918-43f5-a4de-18dbf7d2ecf3",
+                "3cc3a22c-05a4-4e40-bee7-179f9bf8d0c6"
+            ],
+            "pipeline": "8a556b3f-4b05-4977-82b6-3a8796938fbb",
+            "status": [
+                "successful"
+            ],
+            "type": "pipeline"
+        }
+    ],
+    "updateTs": "1598396532000"
+}

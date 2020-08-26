@@ -1,0 +1,103 @@
+
+ToStage pipeline config
+
+```
+{
+  "expectedArtifacts": [
+    {
+      "defaultArtifact": {
+        "customKind": true,
+        "id": "56ff9fea-21c8-47ec-b072-d5ffaa2b5cfd"
+      },
+      "displayName": "jusong-docker-img",
+      "id": "23bf15cb-9e27-448c-8c5b-0769b08e86f8",
+      "matchArtifact": {
+        "artifactAccount": "docker-registry",
+        "id": "6a82df0d-5d6b-4406-b638-531b70320d2a",
+        "name": "633102329196.dkr.ecr.us-east-2.amazonaws.com/jusong-solo-microservice",
+        "type": "docker/image"
+      },
+      "useDefaultArtifact": false,
+      "usePriorArtifact": false
+    },
+    {
+      "defaultArtifact": {
+        "artifactAccount": "Jusong-solo",
+        "id": "0eeed292-7320-42b5-9cd9-b3081e79fa8e",
+        "name": "manifests/deploy-microservice.yml",
+        "reference": "https://api.github.com/repos/jusongchen/spinnaker-study/contents/manifests/deploy-microservice.yml",
+        "type": "github/file",
+        "version": "master"
+      },
+      "displayName": "deploy-microservice.yml",
+      "id": "8b28c890-8ea3-4359-a221-2fef1f7d2a48",
+      "matchArtifact": {
+        "artifactAccount": "jusong-solo-microservice",
+        "id": "b6ce1cad-4994-4030-b873-ed129c344d50",
+        "name": "manifests/deploy-microservice.yml",
+        "type": "github/file"
+      },
+      "useDefaultArtifact": true,
+      "usePriorArtifact": false
+    }
+  ],
+  "keepWaitingPipelines": false,
+  "lastModifiedBy": "jusongchen",
+  "limitConcurrent": true,
+  "notifications": [
+    {
+      "address": "jusong.chen@salesforce.com",
+      "level": "pipeline",
+      "type": "email",
+      "when": [
+        "pipeline.complete",
+        "pipeline.starting",
+        "pipeline.failed"
+      ]
+    }
+  ],
+  "spelEvaluator": "v4",
+  "stages": [
+    {
+      "account": "eks-stage",
+      "cloudProvider": "kubernetes",
+      "manifestArtifactAccount": "mereg0-github",
+      "manifestArtifactId": "8b28c890-8ea3-4359-a221-2fef1f7d2a48",
+      "moniker": {
+        "app": "jusong-solo-microservice"
+      },
+      "name": "Deploy (Manifest)",
+      "refId": "1",
+      "requiredArtifactIds": [
+        "23bf15cb-9e27-448c-8c5b-0769b08e86f8"
+      ],
+      "requiredArtifacts": [],
+      "requisiteStageRefIds": [],
+      "skipExpressionEvaluation": false,
+      "source": "artifact",
+      "trafficManagement": {
+        "enabled": false,
+        "options": {
+          "enableTraffic": false,
+          "services": []
+        }
+      },
+      "type": "deployManifest"
+    }
+  ],
+  "triggers": [
+    {
+      "enabled": true
+    },
+    {
+      "account": "my-ecr-registry",
+      "enabled": true,
+      "registry": "633102329196.dkr.ecr.us-east-2.amazonaws.com",
+      "repository": "jusong-solo-microservice",
+      "type": "docker"
+    }
+  ],
+  "updateTs": "1598391988000"
+}
+
+```

@@ -1,0 +1,121 @@
+{
+    "disabled": true,
+    "expectedArtifacts": [
+        {
+            "defaultArtifact": {
+                "artifactAccount": "my-s3-account",
+                "id": "d77d74b7-c862-48c6-b373-a7de6fbd1228",
+                "reference": "s3://helm-charts-658e5f4d-3bd7-4ff6-b46f-67fc92881c14/${trigger['properties']['JOB_NAME']}/${trigger['properties']['BUILD_ID']}/quarkus-microservice-chart.tar.gz",
+                "type": "s3/object"
+            },
+            "displayName": "microservice-chart-tar-gz",
+            "id": "0b88e99e-f4ab-4abf-9fd0-fa17b35f0e99",
+            "matchArtifact": {
+                "artifactAccount": "my-s3-account",
+                "id": "75d8dead-5794-476b-b299-fe992997d402",
+                "type": "s3/object"
+            },
+            "useDefaultArtifact": true,
+            "usePriorArtifact": false
+        }
+    ],
+    "keepWaitingPipelines": false,
+    "lastModifiedBy": "jusongchen",
+    "limitConcurrent": true,
+    "spelEvaluator": "v4",
+    "stages": [
+        {
+            "expectedArtifacts": [
+                {
+                    "defaultArtifact": {
+                        "customKind": true,
+                        "id": "7597a6f2-9d54-4a21-8a76-ffe6f9667418"
+                    },
+                    "displayName": "baked-jusong-solo-microservice",
+                    "id": "106ac55f-ec31-4531-8e60-9dcac0dc0de4",
+                    "matchArtifact": {
+                        "id": "c340fd44-28ec-42f5-87f5-865d68c47b4a",
+                        "name": "jusong-solo",
+                        "type": "embedded/base64"
+                    },
+                    "useDefaultArtifact": false,
+                    "usePriorArtifact": false
+                }
+            ],
+            "inputArtifacts": [
+                {
+                    "account": "my-s3-account",
+                    "id": "0b88e99e-f4ab-4abf-9fd0-fa17b35f0e99"
+                }
+            ],
+            "name": "Bake (Manifest)",
+            "outputName": "jusong-solo",
+            "overrides": {
+                "releaseType": "staging",
+                "tag": "${trigger['properties']['BUILD_ID']}"
+            },
+            "refId": "1",
+            "requisiteStageRefIds": [],
+            "templateRenderer": "HELM2",
+            "type": "bakeManifest"
+        },
+        {
+            "account": "eks-stage",
+            "cloudProvider": "kubernetes",
+            "manifestArtifactAccount": "embedded-artifact",
+            "manifestArtifactId": "106ac55f-ec31-4531-8e60-9dcac0dc0de4",
+            "moniker": {
+                "app": "jusong-solo-baked"
+            },
+            "name": "Deploy (Manifest)",
+            "refId": "2",
+            "requisiteStageRefIds": [
+                "1"
+            ],
+            "skipExpressionEvaluation": false,
+            "source": "artifact",
+            "trafficManagement": {
+                "enabled": false,
+                "options": {
+                    "enableTraffic": false,
+                    "services": []
+                }
+            },
+            "type": "deployManifest"
+        },
+        {
+            "failPipeline": true,
+            "instructions": "Deploy to production?",
+            "judgmentInputs": [],
+            "name": "Manual Judgment",
+            "notifications": [],
+            "refId": "3",
+            "requisiteStageRefIds": [
+                "2"
+            ],
+            "type": "manualJudgment"
+        },
+        {
+            "application": "jusong-solo-baked",
+            "failPipeline": true,
+            "name": "Pipeline",
+            "pipeline": "1f27b129-0c2b-4c26-8ffa-15fcf4bc5f71",
+            "refId": "4",
+            "requisiteStageRefIds": [
+                "3"
+            ],
+            "type": "pipeline",
+            "waitForCompletion": true
+        }
+    ],
+    "triggers": [
+        {
+            "enabled": true,
+            "job": "jusong-solo-microservice",
+            "master": "my-jenkins",
+            "propertyFile": "spinnaker.properties",
+            "type": "jenkins"
+        }
+    ],
+    "updateTs": "1598481081000"
+}

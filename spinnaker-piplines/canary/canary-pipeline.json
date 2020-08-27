@@ -1,0 +1,365 @@
+{
+    "keepWaitingPipelines": false,
+    "lastModifiedBy": "jusongchen",
+    "limitConcurrent": true,
+    "spelEvaluator": "v4",
+    "stages": [
+        {
+            "account": "eks-stage",
+            "cloudProvider": "kubernetes",
+            "manifests": [
+                {
+                    "apiVersion": "apps/v1",
+                    "kind": "Deployment",
+                    "metadata": {
+                        "labels": {
+                            "app": "jusong-solo-microservice-canary",
+                            "release": "canary",
+                            "source": "demo",
+                            "stack": "frontend"
+                        },
+                        "name": "jusong-solo-microservice-canary",
+                        "namespace": "microservices"
+                    },
+                    "spec": {
+                        "replicas": 3,
+                        "selector": {
+                            "matchLabels": {
+                                "run": "jusong-solo-microservice-canary"
+                            }
+                        },
+                        "template": {
+                            "metadata": {
+                                "labels": {
+                                    "app": "jusong-solo-microservice-canary",
+                                    "release": "canary",
+                                    "run": "jusong-solo-microservice-canary",
+                                    "source": "demo"
+                                }
+                            },
+                            "spec": {
+                                "containers": [
+                                    {
+                                        "image": "633102329196.dkr.ecr.us-east-2.amazonaws.com/jusong-solo-microservice:${trigger['properties']['BUILD_ID']}",
+                                        "name": "jusong-solo-microservice-canary",
+                                        "ports": [
+                                            {
+                                                "containerPort": 8080,
+                                                "name": "web"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                },
+                {
+                    "apiVersion": "v1",
+                    "kind": "Service",
+                    "metadata": {
+                        "labels": {
+                            "app": "jusong-solo-microservice-service-canary"
+                        },
+                        "name": "jusong-solo-microservice-service-canary",
+                        "namespace": "microservices"
+                    },
+                    "spec": {
+                        "ports": [
+                            {
+                                "name": "web",
+                                "port": 30201,
+                                "protocol": "TCP",
+                                "targetPort": 8080
+                            }
+                        ],
+                        "selector": {
+                            "app": "jusong-solo-microservice-canary",
+                            "source": "demo"
+                        }
+                    }
+                },
+                {
+                    "apiVersion": "monitoring.coreos.com/v1",
+                    "kind": "ServiceMonitor",
+                    "metadata": {
+                        "labels": {
+                            "release": "lasertag"
+                        },
+                        "name": "jusong-solo-microservice-service-monitor-canary"
+                    },
+                    "spec": {
+                        "endpoints": [
+                            {
+                                "interval": "30s",
+                                "path": "/metrics",
+                                "port": "web"
+                            }
+                        ],
+                        "namespaceSelector": {
+                            "matchNames": [
+                                "microservices"
+                            ]
+                        },
+                        "selector": {
+                            "matchLabels": {
+                                "app": "jusong-solo-microservice-service-canary"
+                            }
+                        }
+                    }
+                },
+                {
+                    "apiVersion": "networking.k8s.io/v1beta1",
+                    "kind": "Ingress",
+                    "metadata": {
+                        "annotations": {
+                            "nginx.ingress.kubernetes.io/rewrite-target": "/$2"
+                        },
+                        "name": "jusong-solo-ingress-canary",
+                        "namespace": "microservices"
+                    },
+                    "spec": {
+                        "rules": [
+                            {
+                                "http": {
+                                    "paths": [
+                                        {
+                                            "backend": {
+                                                "serviceName": "jusong-solo-microservice-service-canary",
+                                                "servicePort": 30201
+                                            },
+                                            "path": "/jusong-solo/canary(/|$)(.*)"
+                                        }
+                                    ]
+                                }
+                            }
+                        ]
+                    }
+                }
+            ],
+            "moniker": {
+                "app": "jusong-solo-canary"
+            },
+            "name": "Deploy Canary",
+            "refId": "1",
+            "requisiteStageRefIds": [],
+            "skipExpressionEvaluation": false,
+            "source": "text",
+            "trafficManagement": {
+                "enabled": false,
+                "options": {
+                    "enableTraffic": false,
+                    "services": []
+                }
+            },
+            "type": "deployManifest"
+        },
+        {
+            "account": "eks-prod",
+            "app": "jusong-solo-canary",
+            "cloudProvider": "kubernetes",
+            "location": "microservices",
+            "manifestName": "deployment jusong-solo-microservice",
+            "mode": "static",
+            "name": "Find Baseline",
+            "refId": "2",
+            "requisiteStageRefIds": [
+                "1"
+            ],
+            "type": "findArtifactsFromResource"
+        },
+        {
+            "account": "eks-stage",
+            "cloudProvider": "kubernetes",
+            "manifests": [
+                {
+                    "apiVersion": "apps/v1",
+                    "kind": "Deployment",
+                    "metadata": {
+                        "labels": {
+                            "app": "jusong-solo-microservice-baseline",
+                            "release": "baseline",
+                            "source": "demo",
+                            "stack": "frontend"
+                        },
+                        "name": "jusong-solo-microservice-baseline",
+                        "namespace": "microservices"
+                    },
+                    "spec": {
+                        "replicas": 3,
+                        "selector": {
+                            "matchLabels": {
+                                "run": "jusong-solo-microservice-baseline"
+                            }
+                        },
+                        "template": {
+                            "metadata": {
+                                "labels": {
+                                    "app": "jusong-solo-microservice-baseline",
+                                    "release": "baseline",
+                                    "run": "jusong-solo-microservice-baseline",
+                                    "source": "demo"
+                                }
+                            },
+                            "spec": {
+                                "containers": [
+                                    {
+                                        "image": "${#stage('Find Baseline').context[\"artifacts\"][0][\"reference\"]}",
+                                        "name": "jusong-solo-microservice-baseline",
+                                        "ports": [
+                                            {
+                                                "containerPort": 8080,
+                                                "name": "web"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                },
+                {
+                    "apiVersion": "v1",
+                    "kind": "Service",
+                    "metadata": {
+                        "labels": {
+                            "app": "jusong-solo-microservice-service-baseline"
+                        },
+                        "name": "jusong-solo-microservice-service-baseline",
+                        "namespace": "microservices"
+                    },
+                    "spec": {
+                        "ports": [
+                            {
+                                "name": "web",
+                                "port": 30201,
+                                "protocol": "TCP",
+                                "targetPort": 8080
+                            }
+                        ],
+                        "selector": {
+                            "app": "jusong-solo-microservice-baseline",
+                            "source": "demo"
+                        }
+                    }
+                },
+                {
+                    "apiVersion": "monitoring.coreos.com/v1",
+                    "kind": "ServiceMonitor",
+                    "metadata": {
+                        "labels": {
+                            "release": "lasertag"
+                        },
+                        "name": "jusong-solo-microservice-service-monitor-baseline"
+                    },
+                    "spec": {
+                        "endpoints": [
+                            {
+                                "interval": "30s",
+                                "path": "/metrics",
+                                "port": "web"
+                            }
+                        ],
+                        "namespaceSelector": {
+                            "matchNames": [
+                                "microservices"
+                            ]
+                        },
+                        "selector": {
+                            "matchLabels": {
+                                "app": "jusong-solo-microservice-service-baseline"
+                            }
+                        },
+                        "targetLabels": [
+                            "release app source"
+                        ]
+                    }
+                },
+                {
+                    "apiVersion": "networking.k8s.io/v1beta1",
+                    "kind": "Ingress",
+                    "metadata": {
+                        "annotations": {
+                            "nginx.ingress.kubernetes.io/rewrite-target": "/$2"
+                        },
+                        "name": "jusong-solo-ingress-baseline",
+                        "namespace": "microservices"
+                    },
+                    "spec": {
+                        "rules": [
+                            {
+                                "http": {
+                                    "paths": [
+                                        {
+                                            "backend": {
+                                                "serviceName": "jusong-solo-microservice-service-baseline",
+                                                "servicePort": 30201
+                                            },
+                                            "path": "/jusong-solo/baseline(/|$)(.*)"
+                                        }
+                                    ]
+                                }
+                            }
+                        ]
+                    }
+                }
+            ],
+            "moniker": {
+                "app": "jusong-solo-canary"
+            },
+            "name": "Deploy Baseline",
+            "refId": "3",
+            "requisiteStageRefIds": [
+                "2"
+            ],
+            "skipExpressionEvaluation": false,
+            "source": "text",
+            "trafficManagement": {
+                "enabled": false,
+                "options": {
+                    "enableTraffic": false,
+                    "services": []
+                }
+            },
+            "type": "deployManifest"
+        },
+        {
+            "analysisType": "realTime",
+            "canaryConfig": {
+                "canaryAnalysisIntervalMins": "1",
+                "canaryConfigId": "8a7d907b-34bf-49e1-929c-a1e544238d58",
+                "lifetimeDuration": "PT0H4M",
+                "metricsAccountName": "prometheus-internal",
+                "scopes": [
+                    {
+                        "controlScope": "jusong-solo-microservice-baseline",
+                        "experimentScope": "jusong-solo-microservice-canary",
+                        "extendedScopeParams": {},
+                        "scopeName": "default"
+                    }
+                ],
+                "scoreThresholds": {
+                    "marginal": "50",
+                    "pass": "50"
+                },
+                "storageAccountName": "aws-canary"
+            },
+            "name": "Canary Analysis",
+            "refId": "4",
+            "requisiteStageRefIds": [
+                "3"
+            ],
+            "type": "kayentaCanary"
+        }
+    ],
+    "triggers": [
+        {
+            "enabled": true,
+            "job": "jusong-solo-microservice",
+            "master": "my-jenkins",
+            "propertyFile": "spinnaker.properties",
+            "type": "jenkins"
+        }
+    ],
+    "updateTs": "1598487254000"
+}

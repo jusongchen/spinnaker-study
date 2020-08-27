@@ -1,0 +1,52 @@
+{
+    "disabled": true,
+    "expectedArtifacts": [
+        {
+            "defaultArtifact": {
+                "customKind": true,
+                "id": "87f130cf-45e4-43ad-97a6-40826355a507"
+            },
+            "displayName": "jusong-solo-baked",
+            "id": "b3553647-1c55-4737-bcdd-6c6fd3a0cffa",
+            "matchArtifact": {
+                "artifactAccount": "embedded-artifact",
+                "id": "86931b45-5936-4afe-92d5-09ac03e6e11b",
+                "type": "embedded/base64"
+            },
+            "useDefaultArtifact": false,
+            "usePriorArtifact": false
+        }
+    ],
+    "keepWaitingPipelines": false,
+    "lastModifiedBy": "jusongchen",
+    "limitConcurrent": true,
+    "spelEvaluator": "v4",
+    "stages": [
+        {
+            "account": "eks-prod",
+            "cloudProvider": "kubernetes",
+            "manifestArtifactAccount": "embedded-artifact",
+            "manifestArtifactId": "b3553647-1c55-4737-bcdd-6c6fd3a0cffa",
+            "moniker": {
+                "app": "jusong-solo-baked"
+            },
+            "name": "Deploy (Manifest)",
+            "refId": "1",
+            "requiredArtifactIds": [],
+            "requiredArtifacts": [],
+            "requisiteStageRefIds": [],
+            "skipExpressionEvaluation": false,
+            "source": "artifact",
+            "trafficManagement": {
+                "enabled": false,
+                "options": {
+                    "enableTraffic": false,
+                    "services": []
+                }
+            },
+            "type": "deployManifest"
+        }
+    ],
+    "triggers": [],
+    "updateTs": "1598481094000"
+}

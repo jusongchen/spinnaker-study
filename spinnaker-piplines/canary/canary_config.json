@@ -1,0 +1,44 @@
+{
+    "applications": [
+        "jusong-solo-canary"
+    ],
+    "classifier": {
+        "groupWeights": {
+            "Group 1": 100
+        }
+    },
+    "configVersion": "1",
+    "createdTimestamp": 1598482785229,
+    "createdTimestampIso": "2020-08-26T22:59:45.229Z",
+    "description": "canary config",
+    "judge": {
+        "judgeConfigurations": {},
+        "name": "NetflixACAJudge-v1.0"
+    },
+    "metrics": [
+        {
+            "analysisConfigurations": {
+                "canary": {
+                    "direction": "increase"
+                }
+            },
+            "groups": [
+                "Group 1"
+            ],
+            "name": "mean_seconds",
+            "query": {
+                "customFilterTemplate": "pod",
+                "metricName": "application_org_acme_metrics_PrimeNumberChecker_checksTimer_mean_seconds",
+                "serviceType": "prometheus",
+                "type": "prometheus"
+            },
+            "scopeName": "default"
+        }
+    ],
+    "name": "jusong-solo-config",
+    "templates": {
+        "pod": "pod=~\"${scope}.+\""
+    },
+    "updatedTimestamp": 1598485190281,
+    "updatedTimestampIso": "2020-08-26T23:39:50.281Z"
+}
